@@ -169,6 +169,8 @@ git remote add upstream https://github.com/owner/repo-name.git
 
 ### Keeping a Fork in Sync
 
+Routine path (fork as a contributor — merge upstream into your branch):
+
 ```bash
 # Pure git — works everywhere
 git fetch upstream
@@ -177,11 +179,25 @@ git merge upstream/main
 git push origin main
 ```
 
-**With gh (shortcut):**
+**With gh (shortcut):** `gh repo sync $GH_USER/repo-name` — fine when one fork branch should simply track its upstream counterpart; it aligns one branch at a time, so it cannot mirror a differently-named branch or align several at once.
 
-```bash
-gh repo sync $GH_USER/repo-name
-```
+#### Make a fork branch *identical* to upstream (exact mirror)
+
+Use when the ask is "our `<branch>` should be exactly like upstream's, and our own branch too, locally and on the remote." Identical means the same SHA — not "merges cleanly".
+
+1. **Read the remotes first** — `git remote -v`. Never hardcode which remote is canonical; each fork/machine differs. Add it if missing: `git remote add upstream https://github.com/<canonical-owner>/<repo>.git`.
+2. **Fetch both, with prune:** `git fetch upstream --prune && git fetch origin --prune`. A stale remote-tracking ref makes every later comparison wrong.
+3. **Measure divergence before touching any ref:** `git rev-list --left-right --count A...B` prints `left right` — left = commits only in A, right = commits only in B. `0 N` means A is a pure ancestor of B, so the sync is a fast-forward and **no force-push is needed anywhere**. A non-zero left count means the branch being overwritten holds unique commits: list them and get the user's go-ahead before continuing.
+4. **Preserve what a reset would destroy:**
+   - Uncommitted changes: `git diff > "$SCRATCH/<name>.patch"`. `git checkout -- .` and `git reset --hard` discard them with no prompt, and a stash is easy to forget.
+   - Every ref about to move: `git tag -f backup/<branch>-<why> <ref>`.
+   Do not wave away uncommitted `composer.lock` / `package-lock.json` diffs as "just install noise" — save the patch and let the user decide; local dependency bumps are the user's state.
+5. **Move the local refs:** `git checkout -B <branch> <target>` (e.g. `git checkout -B beta upstream/beta`, then `git checkout -B sonia beta`). `-B` resets an existing branch in place and keeps its branch config.
+6. **Preflight each push with an explicit refspec:** `git push --dry-run origin <ref>:refs/heads/<branch>`. Push with the full refspec rather than a bare `git push` — a branch whose upstream is a differently-named remote branch is exactly the situation here, and a bare push then either fails or targets the wrong ref. If auth is in question, `git ls-remote origin` proves it and `gh auth setup-git` wires the gh credential helper.
+7. **Push.** With the pure-ancestor relationship from step 3 this is a plain push. If a force is genuinely required, use `--force-with-lease`, never bare `-f`.
+8. **Verify with SHAs, not prose.** Re-`fetch` so remote-tracking refs reflect the server, then confirm every ref that should match returns the same `git rev-parse` and that `git rev-list --left-right --count <a>...<b>` is `0 0` for each pair. `git ls-remote <remote> refs/heads/<branch>` returns the server's own SHA and is the strongest check. Report the SHA table.
+
+**Tracking trap:** `checkout -B` keeps the old upstream config, so a freshly mirrored branch can still track a *different* remote branch and `git status` prints `<branch>...<other-branch>` with an ahead/behind count — that reads as "out of sync" when the SHAs are in fact identical. Either set tracking deliberately (`git branch -u origin/<branch>`) or state which branch still tracks what. Never "fix" a tracking mismatch with a force-push.
 
 ## 4. Repository Information
 

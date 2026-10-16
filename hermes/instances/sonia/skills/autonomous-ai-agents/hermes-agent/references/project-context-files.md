@@ -46,3 +46,15 @@ Hermes: when working in this repo, follow these rules.
 ```
 
 That file at `/home/me/projects/myrepo/.hermes.md` is auto-loaded when Hermes runs in any subdirectory of `/home/me/projects/myrepo`, but not when it runs in `/home/me/other-project`.
+
+### Adjacent: repo-local skills are not context files
+
+Repos increasingly vendor agent skills for other harnesses under `.agents/skills/` (and Claude Code's `.claude/skills/`). Those are **not** context files, and they are **not** in the Hermes skill catalog — `skills_list` / `skill_view` cover `$HERMES_HOME/skills/` and installed plugins.
+
+So when the user names a skill ("do you have the `improve` skill?") and it is missing from `skills_list`, check the project before answering no:
+
+```bash
+ls .agents/skills/ .claude/skills/ 2>/dev/null
+```
+
+Then read it with `read_file` and follow it — a repo-local `SKILL.md` is fully usable that way; all that is missing is the catalog lookup and auto-listing. Also read its `references/` siblings, since these skills routinely split depth out the same way Hermes skills do. If the user wants it first-class, copy the whole directory (SKILL.md plus support files) under `$HERMES_HOME/skills/<category>/<name>/` — offer that, do not do it silently, because it changes the catalog on every future session and not just this project.
