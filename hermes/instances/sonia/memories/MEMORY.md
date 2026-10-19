@@ -2,7 +2,7 @@ For h-dashboard PRs: user says 'pr' → create PR from current branch to upstrea
 §
 Boost MCP occasionally dies on first stdio call ("lost its stdio subprocess") — just call it again. CLI fallback always works: php scripts/boost_tool.php <tool> '<json>'.
 §
-h-dashboard branch sonia tracks origin/beta (branch.sonia.merge=refs/heads/beta), so `git status` shows 'sonia...origin/beta'; Remote `upstream` = asgarimehdi/h-dashboard (canonical) is configured in the local clone; origin = sonia-shab/h-dashboard fork. Auth via gh credential helper (sonia-shab token).
+h-dashboard branch sonia tracks upstream/beta (set by `checkout -B sonia upstream/beta`), so `git status` shows 'sonia...upstream/beta'; Remote `upstream` = asgarimehdi/h-dashboard (canonical) is configured in the local clone; origin = sonia-shab/h-dashboard fork, which also has a `sonia` branch. Auth via gh credential helper (sonia-shab token).
 §
 MaryUI x-select defaults to optionValue='id'/optionLabel='name'. Options keyed 'value'/'label' need explicit option-value="value" option-label="label" or every <option> renders empty (blank control). Pass :options="$this->myOptions()" from a component method — a bare $myOptions is undefined in the Blade view.
 §
