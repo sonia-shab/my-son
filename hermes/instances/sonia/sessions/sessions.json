@@ -44,9 +44,9 @@
   },
   "agent:main:telegram:dm:100651143": {
     "session_key": "agent:main:telegram:dm:100651143",
-    "session_id": "20261020_145917_384173ac",
-    "created_at": "2026-10-20T14:59:17.849182",
-    "updated_at": "2026-10-20T14:59:17.849182",
+    "session_id": "20261020_151705_ba029583",
+    "created_at": "2026-10-20T15:17:05.868154",
+    "updated_at": "2026-10-20T15:17:05.868154",
     "display_name": "M A",
     "platform": "telegram",
     "chat_type": "dm",
@@ -67,7 +67,7 @@
     "last_resume_marked_at": null,
     "active_turn_token": null,
     "active_turn_started_at": null,
-    "is_fresh_reset": true,
+    "is_fresh_reset": false,
     "was_auto_reset": false,
     "auto_reset_reason": null,
     "reset_had_activity": false,
@@ -81,7 +81,7 @@
       "user_name": "M A",
       "thread_id": null,
       "chat_topic": null,
-      "message_id": "342"
+      "message_id": "365"
     }
   }
 }

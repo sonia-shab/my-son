@@ -45,6 +45,13 @@ not sufficient — CI proves the branch is green, not that the tests pin the cha
    the runner is loading the tracked file, not yours. Also run the repo's app-key
    bootstrap script when it has one (blank `APP_KEY` in the tracked env file
    surfaces as `MissingAppKeyException` several tests in).
+   **Re-run the bootstrap script after any `git checkout -- .env.testing`.** That
+   hygiene step restores the tracked placeholder (empty `APP_KEY` by design, so
+   no key ever leaks into git) and silently breaks the whole suite — a mass
+   `MissingAppKeyException` failure is an env artefact, not a code regression.
+   Check `git status --short` after regenerating: the key lands in a *tracked*
+   file, so it must never be staged or committed. Repos that forbid committed
+   keys ship a `scripts/check-app-key-leak.php` guard — run it before pushing.
 4. Copy or link generated frontend assets the views need (`public/build/`,
    `manifest.json`) or every test that renders a layout dies with
    "Vite manifest not found".
@@ -79,6 +86,14 @@ not sufficient — CI proves the branch is green, not that the tests pin the cha
   together prove the background refresh actually ran.
 - Re-check CI on the exact head SHA (`gh pr view N --json headRefOid`) rather
   than trusting an earlier read; blocking jobs can still be running.
+- **Separate local-toolchain noise from branch regressions.** A hardlinked
+  `vendor/` can drift from `composer.lock` (e.g. installed laravel/framework
+  v13.38.0 vs a lock pinning v13.35.0), which makes local PHPStan report
+  errors CI never sees — typically "Ignored error pattern ... was not matched"
+  in files the branch never touched. Confirm by running the same tool on the
+  base branch: identical output there means the branch is clean and the local
+  environment is stale, not that the PR broke something. Say this explicitly
+  in the review instead of reporting the branch as failing.
 
 ## Hygiene
 
